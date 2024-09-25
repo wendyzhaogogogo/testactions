@@ -1,0 +1,50 @@
+name: Merge branches on issue update
+
+on:
+  workflow_dispatch:
+  issues:
+    types: [opened, edited, reopened]
+
+jobs:
+  merge-branches:
+    runs-on: ubuntu-latest
+    if: startsWith(github.event.issue.title, '[light-merge]') # 添加判断
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Git
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+      - name: Get target branch and source branches
+        id: get_branches
+        run: |
+          title="${{ github.event.issue.title }}"
+          target_branch=$(echo "$title" | grep -oP '(?<=\[light-merge\]).*' | xargs)
+          body="${{ github.event.issue.body }}"
+          source_branches=$(echo "$body" | tr '\n' ' ')
+          echo "target_branch=$target_branch" >> $GITHUB_ENV
+          echo "source_branches=$source_branches" >> $GITHUB_ENV
+
+      - name: Create target branch
+        run: |
+          git checkout main
+          git checkout -b "${{ env.target_branch }}"
+
+      - name: Merge source branches
+        run: |
+          set -e  # 任何命令失败时终止脚本
+          source_branches="${{ env.source_branches }}"
+          source_branches=$(echo "$source_branches" | tr '\n' ' ' | sed 's/[[:space:]]\+/ /g; s/^ //; s/ $//')
+          
+          for branch in $source_branches; do
+            echo "Merging branch: $branch"
+            git fetch origin "$branch"
+            git merge "origin/$branch" --allow-unrelated-histories -m "Merging branch '$branch' into '${{ env.target_branch }}'"
+          done
+
+      - name: Push target branch
+        run: |
+          git push origin "${{ env.target_branch }}" -f
