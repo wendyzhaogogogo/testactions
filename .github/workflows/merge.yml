@@ -1,17 +1,16 @@
-name: Merge branches on issue update
+name: light-merge
 
 on:
-  workflow_dispatch:
   issues:
     types: [opened, edited, reopened]
 
 jobs:
-  merge-branches:
+  light-merge-job:
     runs-on: ubuntu-latest
     if: startsWith(github.event.issue.title, '[light-merge]') # 添加判断
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      # - name: Checkout code
+      #   uses: actions/checkout@v2
 
       - name: Set up Git
         run: |
@@ -27,6 +26,11 @@ jobs:
           source_branches=$(echo "$body" | tr '\n' ' ')
           echo "target_branch=$target_branch" >> $GITHUB_ENV
           echo "source_branches=$source_branches" >> $GITHUB_ENV
+
+      - name: Add new remote
+        run: |
+          git remote add origin https://github.com/alva-ai/frontend-monorepo.git
+          git fetch origin
 
       - name: Create target branch
         run: |
@@ -47,5 +51,4 @@ jobs:
 
       - name: Push target branch
         run: |
-          echo ${{ secrets.GITHUB_TOKEN }}
           git push origin "${{ env.target_branch }}" -f
