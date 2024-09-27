@@ -48,4 +48,6 @@ jobs:
       - name: Push target branch
         run: |
           echo ${{ secrets.GITHUB_TOKEN }}
-          git push origin "${{ env.target_branch }}" -f
+          git push https://wendyzhaogogogo:${{ secrets.SECA }}@github.com/wendyzhaogogogo/testactions.git "${{ env.target_branch }}" -f
+
+          
