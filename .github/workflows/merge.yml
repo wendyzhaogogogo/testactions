@@ -47,4 +47,5 @@ jobs:
 
       - name: Push target branch
         run: |
+          echo ${{ secrets.GITHUB_TOKEN }}
           git push origin "${{ env.target_branch }}" -f
