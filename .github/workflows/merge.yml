@@ -46,7 +46,8 @@ jobs:
           set -e  # 任何命令失败时终止脚本
           source_branches="${{ env.source_branches }}"
           source_branches=$(echo "$source_branches" | tr '\n' ' ' | sed 's/[[:space:]]\+/ /g; s/^ //; s/ $//')
-          
+          git status
+          git log --graph --all --decorate --oneline
           for branch in $source_branches; do
             echo "Merging branch: $branch"
             git fetch origin "$branch"
