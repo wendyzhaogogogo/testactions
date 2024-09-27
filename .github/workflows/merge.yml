@@ -9,13 +9,17 @@ jobs:
     runs-on: ubuntu-latest
     if: startsWith(github.event.issue.title, '[light-merge]') # 添加判断
     steps:
-      # - name: Checkout code
-      #   uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          repository: alva-ai/frontend-monorepo  # 指定要检出的目标仓库
+          token: ${{ secrets.SECA }}  # 使用个人访问令牌 (PAT) 进行身份验证
 
       - name: Set up Git
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
+          git config --local merge.strategy ort
 
       - name: Get target branch and source branches
         id: get_branches
@@ -27,10 +31,10 @@ jobs:
           echo "target_branch=$target_branch" >> $GITHUB_ENV
           echo "source_branches=$source_branches" >> $GITHUB_ENV
 
-      - name: Add new remote
-        run: |
-          git remote add origin https://github.com/alva-ai/frontend-monorepo.git
-          git fetch origin
+      # - name: Add new remote
+      #   run: |
+      #     git remote add origin https://github.com/alva-ai/frontend-monorepo.git
+      #     git fetch origin
 
       - name: Create target branch
         run: |
